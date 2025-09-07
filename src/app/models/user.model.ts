@@ -1,6 +1,11 @@
 import { model, Schema } from "mongoose";
-import { IUser } from "../interfaces/user.interface";
+import { IAddress, IUser } from "../interfaces/user.interface";
 
+const addressSchema= new Schema<IAddress>({
+        city: {type: String},
+        street: {type: String},
+        zip: {type: Number}
+})
 const userSchema= new Schema<IUser>({
     firstName:{
         type: String, 
@@ -24,7 +29,8 @@ const userSchema= new Schema<IUser>({
             message: "Provide valid user. Got {VALUE}"
         },
         default: "user"
-    }
+    },
+    address:{type: addressSchema}
 })
 
 export const User= model("User", userSchema)
