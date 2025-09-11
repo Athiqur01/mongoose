@@ -1,9 +1,15 @@
 import express, { Request, Response } from "express"
 import { User } from "../models/user.model"
 import z from "zod"
+import { Note } from "../models/note.model"
 export const userRoute= express.Router()
 
 //zod schema
+const addressZodSchema=z.object({
+    city: z.string(),
+    street: z.string(),
+    zip: z.number()
+})
 
 
 const createUserZodSchema=z.object({
@@ -13,18 +19,35 @@ const createUserZodSchema=z.object({
     age: z.number(),
     password: z.string(),
     role: z.string().optional(),
+    address: addressZodSchema.optional()
     
 })
 
 //post operation
 userRoute.post("/create-user", async(req: Request, res: Response)=>{
     try{
-         const createUser=await createUserZodSchema.parseAsync(req.body)
-         console.log(createUser)
+         const userBody=await createUserZodSchema.parseAsync(req.body)
+         //const createUser= await User.create(userBody)
+
+         //User instance method
+        //  const user= new User(userBody)
+        //  const password= await user.hashPassword(userBody.password)
+        //  console.log(password)
+        //  user.password=password
+        //  await user.save()
+
+         //user instance method
+        const password= await User.hashPassword(userBody.password)
+        console.log(password)
+        userBody.password=password
+        const createUser= await User.create(userBody)
+
+
+         //console.log(createUser)
          res.status(201).json({
          success: true,
          message: "User created successfully",
-         user: {}
+         user: createUser  //user
     })
     }
     catch(error){

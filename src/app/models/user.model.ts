@@ -1,12 +1,15 @@
-import { model, Schema } from "mongoose";
-import { IAddress, IUser } from "../interfaces/user.interface";
+import { Model, model, Schema } from "mongoose";
+import { IAddress, IUser, UserInstanceMethod, UserStaticMethod } from "../interfaces/user.interface";
+import bcrypt from "bcrypt";
 
 const addressSchema= new Schema<IAddress>({
         city: {type: String},
         street: {type: String},
         zip: {type: Number}
+},{
+    _id: false //it will avoid insertion sub-id in mongodb for address object
 })
-const userSchema= new Schema<IUser>({
+const userSchema= new Schema<IUser, UserStaticMethod, UserInstanceMethod>({
     firstName:{
         type: String, 
         required: [true, "First Name is required"], 
@@ -32,5 +35,17 @@ const userSchema= new Schema<IUser>({
     },
     address:{type: addressSchema}
 })
+//instance method
+userSchema.method ("hashPassword", async function(plainPasswors: string){
+    const password= await bcrypt.hash(plainPasswors, 10)
+    console.log(password)
+    return password
+})
+//static method
+userSchema.static("hashPassword", async function(plainPasswors: string){
+    const password= await bcrypt.hash(plainPasswors,10)
+    console.log(password)
+    return password
+})
 
-export const User= model("User", userSchema)
+export const User= model<IUser, UserStaticMethod>("User", userSchema)
